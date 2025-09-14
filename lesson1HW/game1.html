@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Word Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        #word {
+            font-size: 24px;
+            margin: 20px;
+        }
+        #input {
+            margin: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Guess the Word Game</h1>
+<div id="word"></div>
+<input type="text" id="input" maxlength="1" placeholder="Guess a letter" />
+<button onclick="guessLetter()">Guess</button>
+<div id="result"></div>
+
+<script>
+    const word = "Hello World".toLowerCase();
+    let attempts = 10;
+    let guesses = new Set();
+    let wrongGuesses = [];
+
+    function displayWord() {
+        let display = '';
+        for (let char of word) {
+            display += guesses.has(char) || char === ' ' ? char : '_';
+            display += ' ';
+        }
+        document.getElementById('word').innerText = display;
+    }
+
+    function guessLetter() {
+        const input = document.getElementById('input');
+        const guess = input.value.toLowerCase();
+        input.value = '';
+
+        if (guess.length !== 1 || !/^[a-zA-Z]+$/.test(guess)) {
+            alert("Please guess a single alphabet character.");
+            return;
+        }
+
+        if (guesses.has(guess)) {
+            alert("You've already guessed that character. Try again.");
+            return;
+        }
+
+        guesses.add(guess);
+
+        if (!word.includes(guess)) {
+            wrongGuesses.push(guess);
+            attempts--;
+            document.getElementById('result').innerText = `Wrong guess! You have ${attempts} attempts left.`;
+        }
+
+        displayWord();
+
+        if (Array.from(word).every(char => guesses.has(char) || char === ' ')) {
+            alert(`Congratulations! You've guessed the word: ${word}`);
+            resetGame();
+        } else if (attempts <= 0) {
+            alert(`Sorry, you've run out of attempts. The word was: ${word}`);
+            resetGame();
+        }
+    }
+
+    function resetGame() {
+        attempts = 10;
+        guesses.clear();
+        wrongGuesses = [];
+        displayWord();
+        document.getElementById('result').innerText = '';
+    }
+
+    displayWord();
+</script>
+
+</body>
+</html>

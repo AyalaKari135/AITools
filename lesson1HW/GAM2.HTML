@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .card.flipped {
+            background-color: #28a745;
+        }
+        .card.matched {
+            background-color: #ffc107;
+        }
+        #reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #reset-button:hover {
+            background-color: #c82333;
+        }
+        #turns {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Game</h1>
+    <div id="game-board"></div>
+    <button id="reset-button">Reset Game</button>
+    <p id="turns">Turns: 0</p>
+    <script>
+        const cards = [
+            'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
+            'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
+        ];
+
+        let gameBoard = document.getElementById('game-board');
+        let turnsDisplay = document.getElementById('turns');
+        let resetButton = document.getElementById('reset-button');
+        let firstCard, secondCard;
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let turnCount = 0;
+
+        function shuffle() {
+            cards.sort(() => Math.random() - 0.5);
+        }
+
+        function createBoard() {
+            shuffle();
+            for (let card of cards) {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.setAttribute('data-card', card);
+                cardElement.addEventListener('click', flipCard);
+                gameBoard.appendChild(cardElement);
+            }
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add('flipped');
+            this.textContent = this.getAttribute('data-card');
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            lockBoard = true;
+            turnCount++;
+            turnsDisplay.textContent = `Turns: ${turnCount}`;
+
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            if (firstCard.getAttribute('data-card') === secondCard.getAttribute('data-card')) {
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+                resetBoard();
+            } else {
+                setTimeout(() => {
+                    firstCard.classList.remove('flipped');
+                    firstCard.textContent = '';
+                    secondCard.classList.remove('flipped');
+                    secondCard.textContent = '';
+                    resetBoard();
+                }, 1000);
+            }
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        resetButton.addEventListener('click', () => {
+            gameBoard.innerHTML = '';
+            turnCount = 0;
+            turnsDisplay.textContent = 'Turns: 0';
+            createBoard();
+        });
+
+        createBoard();
+    </script>
+</body>
+</html>
