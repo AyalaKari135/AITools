@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הגדרות אישיות — LuxRecipes</title>
+<style>
+  body {
+    font-family: 'Rubik', sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #fff4da, #fffaf4);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.6s ease, background 0.6s, color 0.6s;
+  }
+
+  header {
+    width: 100%;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .brand { font-weight: 700; font-size: 20px; color: #b88a00; }
+
+  nav button {
+    background: linear-gradient(45deg,#e8b600,#c99b0e);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  nav button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(201, 155, 14, 0.4);
+  }
+
+  .container {
+    max-width: 500px;
+    width: 90%;
+    margin: 28px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+  }
+
+  h2 { color: #b88a00; margin-bottom: 20px; text-align: center; }
+  label { display: block; margin: 12px 0 4px; color: #444; font-weight: 500; }
+  select, input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; transition: 0.3s; }
+  select:focus, input:focus { outline: none; border-color: #c99b0e; box-shadow: 0 0 8px rgba(201,155,14,0.3); }
+
+  .settings-actions { display: flex; justify-content: space-between; margin-top: 20px; }
+  .btn { padding: 10px 14px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+  .btn.primary { background: linear-gradient(45deg,#e8b600,#c99b0e); color: white; }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(201, 155, 14,0.4); }
+  .btn.ghost { background: transparent; border: 1px solid #c2b28b; color: #7a6a3c; }
+  .btn.ghost:hover { background: #fff8e6; }
+
+  .note { margin-top: 14px; font-size: 13px; color: #7a6a3c; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">LuxRecipes</div>
+  <nav>
+    <button id="back-home">חזור</button>
+  </nav>
+</header>
+
+<main class="container settings">
+  <h2>הגדרות אישיות</h2>
+
+  <label for="theme-select">ערכת צבעים:</label>
+  <select id="theme-select">
+    <option value="light">בהיר</option>
+    <option value="dark">כהה</option>
+  </select>
+
+  <label for="font-select">גופן:</label>
+  <select id="font-select">
+    <option value="system">מערכת ברירת מחדל</option>
+    <option value="serif">Serif</option>
+    <option value="sans">Sans</option>
+  </select>
+
+  <label for="font-color">צבע טקסט:</label>
+  <input type="color" id="font-color" value="#2b2b2b">
+
+  <label for="profile-image">תמונת פרופיל (קישור או data-url):</label>
+  <input type="text" id="profile-image" placeholder="קישור לתמונה">
+
+  <label for="speech-rate">קצב הקראה:</label>
+  <select id="speech-rate">
+    <option value="0.9">איטי</option>
+    <option value="1" selected>רגיל</option>
+    <option value="1.4">מהיר</option>
+  </select>
+
+  <div class="settings-actions">
+    <button id="save-settings" class="btn primary">שמור</button>
+    <button id="reset-settings" class="btn ghost">איפוס</button>
+  </div>
+
+  <p class="note">הגדרות נשמרות ומתאימות לכל כניסה עתידית.</p>
+</main>
+
+<script>
+function applySettings(settings) {
+  // רקע לפי ערכת נושא
+  if(settings.theme === 'dark'){
+    document.body.style.background = "linear-gradient(135deg, #222, #444)";
+    document.body.style.color = "#f1f1f1";
+  } else {
+    document.body.style.background = "linear-gradient(135deg, #fff4da, #fffaf4)";
+    document.body.style.color = "#2b2b2b";
+  }
+
+  // צבע טקסט
+  if(settings.color) document.body.style.color = settings.color;
+
+  // גופן
+  if(settings.font === 'serif') document.body.style.fontFamily = "serif";
+  else if(settings.font === 'sans') document.body.style.fontFamily = "Arial, sans-serif";
+  else document.body.style.fontFamily = "'Rubik', sans-serif";
+}
+
+// טעינה ראשונית
+window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = localStorage.getItem('lr_current_user');
+  if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  const settings = JSON.parse(localStorage.getItem(`lr_settings_${currentUser}`) || '{}');
+
+  if(settings.theme) document.getElementById('theme-select').value = settings.theme;
+  if(settings.font) document.getElementById('font-select').value = settings.font;
+  if(settings.color) document.getElementById('font-color').value = settings.color;
+  if(settings.profile) document.getElementById('profile-image').value = settings.profile;
+  if(settings.rate) document.getElementById('speech-rate').value = settings.rate;
+
+  applySettings(settings);
+});
+
+// שמירה
+document.getElementById('save-settings').onclick = () => {
+  const currentUser = localStorage.getItem('lr_current_user');
+  const settings = {
+    theme: document.getElementById('theme-select').value,
+    font: document.getElementById('font-select').value,
+    color: document.getElementById('font-color').value,
+    profile: document.getElementById('profile-image').value,
+    rate: document.getElementById('speech-rate').value
+  };
+
+  localStorage.setItem(`lr_settings_${currentUser}`, JSON.stringify(settings));
+  applySettings(settings);
+
+  document.body.style.opacity = 0;
+  setTimeout(() => window.location.href = 'index.html', 600);
+};
+
+// איפוס
+document.getElementById('reset-settings').onclick = () => {
+  const currentUser = localStorage.getItem('lr_current_user');
+  localStorage.removeItem(`lr_settings_${currentUser}`);
+  location.reload();
+};
+
+// חזרה
+document.getElementById('back-home').onclick = () => window.location.href = 'index.html';
+</script>
+</body>
+</html>

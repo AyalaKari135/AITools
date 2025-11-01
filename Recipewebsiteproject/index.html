@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית — LuxRecipes</title>
+
+<style>
+body { font-family: 'Rubik', sans-serif; margin:0; background: linear-gradient(135deg, #fff8f0, #fff1e0); min-height:100vh; }
+header { width:100%; padding: 18px 28px; display:flex; justify-content: space-between; align-items:center; background: rgba(255,255,255,0.95); box-shadow:0 4px 12px rgba(0,0,0,0.05); position: sticky; top:0; z-index:10; }
+.brand { font-weight:700; font-size:20px; color:#b88a00; }
+nav button { margin-left:8px; margin-right:12px; background: linear-gradient(45deg,#e8b600,#c99b0e); color:white; border:none; padding:8px 14px; border-radius:12px; cursor:pointer; transition: all 0.3s; }
+nav button:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(201,155,14,0.4); }
+.container { max-width:1000px; margin:28px auto; padding:0 18px; }
+.hero { background: linear-gradient(90deg, rgba(255,249,240,0.9), rgba(255,255,255,0.6)); padding:22px; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,0.06); text-align:center; }
+.hero h1 { color:#b88a00; margin-bottom:8px; }
+.controls { display:flex; flex-direction:column; gap:12px; margin:18px 0; }
+.controls input { padding:12px; border-radius:12px; border:1px solid #ddd; transition:0.3s; }
+.controls input:focus { outline:none; border-color:#c99b0e; box-shadow:0 0 8px rgba(201,155,14,0.3); }
+.categories { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.cat { padding:8px 16px; border-radius:12px; border:1px solid #eee; background: rgba(255,255,255,0.8); cursor:pointer; transition: all 0.3s; }
+.cat:hover { background: linear-gradient(45deg,#fcd88b,#ffc87f); transform: translateY(-2px); box-shadow:0 6px 18px rgba(255,200,120,0.3); }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:18px; }
+.card { background:white; border-radius:16px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.06); display:flex; flex-direction:column; transition: transform 0.3s, box-shadow 0.3s; cursor:pointer; }
+.card:hover { transform: translateY(-4px); box-shadow:0 10px 28px rgba(0,0,0,0.1); }
+.card-img { height:160px; object-fit:cover; width:100%; }
+.card-body { padding:12px; }
+.card-title { margin:0 0 6px; font-weight:600; }
+.card-sub { color:#666; font-size:14px; }
+/* מודל מתכון */
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; visibility:hidden; opacity:0; transition:0.3s; }
+.modal.active { visibility:visible; opacity:1; }
+.modal-content { background:white; border-radius:16px; padding:20px; max-width:500px; width:90%; max-height:90%; overflow-y:auto; text-align:center; }
+.modal-content img { width:100%; border-radius:12px; margin-bottom:12px; }
+.modal-content button { margin:4px; padding:8px 12px; border:none; border-radius:12px; cursor:pointer; background:#e8b600; color:white; }
+/* מודל הוספת מתכון */
+#add-modal input, #add-modal select, #add-modal textarea { width: 90%; padding:8px; margin:6px 0; border-radius:8px; border:1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">LuxRecipes</div>
+  <nav>
+    <button id="btn-settings">הגדרות</button>
+    <button id="btn-add">הוסף מתכון</button>
+    <button id="btn-logout">יציאה</button>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <h1>ברוכים הבאים ל־LuxRecipes</h1>
+    <p>מתכונים יוקרתיים, עיצובים מודרניים וחוויית שימוש מותאמת אישית</p>
+  </section>
+
+  <section class="controls">
+    <input type="text" id="search" placeholder="חיפוש מתכון, רכיב או שם">
+    <div class="categories">
+      <button class="cat" data-cat="starters">מנות ראשונות</button>
+      <button class="cat" data-cat="mains">מנות עיקריות</button>
+      <button class="cat" data-cat="sides">תוספות</button>
+      <button class="cat" data-cat="desserts">קינוחים</button>
+      <button class="cat" data-cat="drinks">משקאות</button>
+    </div>
+  </section>
+
+  <section id="recipes-grid" class="grid"></section>
+</main>
+
+<!-- מודל מתכון -->
+<div id="recipe-modal" class="modal">
+  <div class="modal-content">
+    <img id="modal-img" src="">
+    <h3 id="modal-title"></h3>
+    <div id="modal-instructions"></div>
+    <button id="start-read">התחל בהקראה</button>
+    <button id="pause-read">עצור</button>
+    <button id="resume-read">המשך</button>
+    <button id="close-modal">סגור</button>
+  </div>
+</div>
+
+<!-- מודל הוספת מתכון -->
+<div id="add-modal" class="modal">
+  <div class="modal-content">
+    <h3>הוסף מתכון חדש</h3>
+    <input type="text" id="new-title" placeholder="שם המתכון">
+    <input type="text" id="new-image" placeholder="כתובת תמונה">
+    <select id="new-category">
+      <option value="starters">מנות ראשונות</option>
+      <option value="mains">מנות עיקריות</option>
+      <option value="sides">תוספות</option>
+      <option value="desserts">קינוחים</option>
+      <option value="drinks">משקאות</option>
+    </select>
+    <textarea id="new-instructions" placeholder="הוראות הכנה"></textarea>
+    <button id="save-recipe">שמור מתכון</button>
+    <button id="close-add">סגור</button>
+  </div>
+</div>
+
+<script>
+// החלת הגדרות משתמש על דף הבית
+window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = localStorage.getItem('lr_current_user');
+  if (!currentUser) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  const settings = JSON.parse(localStorage.getItem(`lr_settings_${currentUser}`) || '{}');
+
+  if(settings.theme === 'dark'){
+    document.body.style.background = "linear-gradient(135deg, #222, #444)";
+    document.body.style.color = "#f1f1f1";
+  } else {
+    document.body.style.background = "linear-gradient(135deg, #fff8f0, #fff1e0)";
+    document.body.style.color = "#2b2b2b";
+  }
+
+  if(settings.color) document.body.style.color = settings.color;
+  if(settings.font === 'serif') document.body.style.fontFamily = "serif";
+  else if(settings.font === 'sans') document.body.style.fontFamily = "Arial, sans-serif";
+  else document.body.style.fontFamily = "'Rubik', sans-serif";
+});
+
+
+function getUserRecipes() {
+  const currentUser = localStorage.getItem('lr_current_user');
+  const userRecipes = JSON.parse(localStorage.getItem(`lr_recipes_${currentUser}`) || '[]');
+  return [...defaultRecipes, ...userRecipes];
+}
+
+function saveUserRecipe(recipe) {
+  const currentUser = localStorage.getItem('lr_current_user');
+  const userRecipes = JSON.parse(localStorage.getItem(`lr_recipes_${currentUser}`) || '[]');
+  userRecipes.push(recipe);
+  localStorage.setItem(`lr_recipes_${currentUser}`, JSON.stringify(userRecipes));
+}
+
+const defaultRecipes = [
+ 
+ 
+  {
+    "title": "חביתה קלאסית",
+    "category": "starters",
+    "image": "IMG/חביתה קלאסית162720.png",
+    "instructions": {
+      "ingredients": ["2 ביצים", "מלח לפי הטעם", "שמן לטיגון"],
+      "steps": ["שבור את הביצים לקערה", "טורף היטב עם מלח", "חמם מחבת עם שמן", "שפוך את הביצים וטגן עד שהחביתה מוכנה"],
+      "prepTime": "5 דקות"
+    }
+  },
+  {
+    "title": "סלט יווני",
+    "category": "starters",
+    "image": "IMG/סלט יוני.png",
+    "instructions": {
+      "ingredients": ["עגבניות", "מלפפון", "בצל סגול", "גבינה בולגרית", "פטרוזיליה", "שמן זית", "מלח"],
+      "steps": ["קצוץ את כל הירקות", "חתוך את הגבינה לקוביות", "ערבב את כל החומרים בקערה", "תבל במלח ושמן זית לפי הטעם"],
+      "prepTime": "10 דקות"
+    }
+  },
+  {
+    "title": "מרק ירקות",
+    "category": "starters",
+    "image": "IMG/מרק ירקות5.png",
+    "instructions": {
+      "ingredients": ["גזר", "קישוא", "תפוח אדמה", "בצל", "מלח", "מים"],
+      "steps": ["קלוף וחתוך את כל הירקות", "הכנס לסיר עם מים", "בשל עד שהירקות רכים", "תבל במלח"],
+      "prepTime": "25 דקות"
+    }
+  },
+  {
+    "title": "סטייק אנטריקוט",
+    "category": "mains",
+    "image": "IMG/סטייק אנטריקוט.png",
+    "instructions": {
+      "ingredients": ["סטייק אנטריקוט", "מלח", "פלפל", "שמן זית"],
+      "steps": ["תבל את הסטייק במלח ופלפל", "חמם מחבת עם שמן זית", "טגן את הסטייק לפי מידת העשייה הרצויה"],
+      "prepTime": "15 דקות"
+    }
+  },
+  {
+    "title": "פסטה פומודורו",
+    "category": "mains",
+    "image": "IMG/פסטה.png",
+    "instructions": {
+      "ingredients": ["פסטה", "רוטב עגבניות", "מלח", "שמן זית", "בזיליקום טרי"],
+      "steps": ["בשל את הפסטה לפי ההוראות על האריזה", "חמם את רוטב העגבניות במחבת", "שפוך את הפסטה על הרוטב וערבב היטב", "קשט בבזיליקום טרי"],
+      "prepTime": "20 דקות"
+    }
+  },
+  {
+    "title": "עוף בתנור",
+    "category": "mains",
+    "image": "IMG/עוף בתנור.png",
+    "instructions": {
+      "ingredients": ["חצי עוף", "מלח", "פלפל", "שום כתוש", "שמן זית"],
+      "steps": ["תבל את העוף בתבלינים ושום", "חמם תנור ל-200°C", "אפה את העוף כ-40 דקות עד שהעוף זהוב ומבושל"],
+      "prepTime": "45 דקות"
+    }
+  },
+  {
+    "title": "תפוחי אדמה צלויים",
+    "category": "sides",
+    "image": "IMG/תפוחי אדמה צלויים.png",
+    "instructions": {
+      "ingredients": ["תפוחי אדמה", "שמן זית", "מלח", "פלפל", "תבלינים לפי הטעם"],
+      "steps": ["קלוף וחתוך את תפוחי האדמה לקוביות", "ערבב עם שמן זית ותבלינים", "אפה בתנור בחום 200°C כ-30 דקות עד הזהבה"],
+      "prepTime": "35 דקות"
+    }
+  },
+  {
+    "title": "אורז עם ירקות",
+    "category": "sides",
+    "image": "IMG/אורז עם ירקות.png",
+    "instructions": {
+      "ingredients": ["1 כוס אורז", "ירקות חתוכים (גזר, אפונה, קישוא)", "מלח", "שמן"],
+      "steps": ["חמם שמן בסיר", "טגן את הירקות קלות", "הוסף אורז ומים לפי יחס אורז-מים", "בשל עד שהאורז מוכן"],
+      "prepTime": "25 דקות"
+    }
+  },
+  {
+    "title": "פשטידת ירקות",
+    "category": "sides",
+    "image": "IMG/פשטידת ירקות.png",
+    "instructions": {
+      "ingredients": ["ירקות מגורדים (גזר, קישוא)", "2 ביצים", "קמח", "מלח ופלפל"],
+      "steps": ["ערבב את כל המרכיבים בקערה", "שפוך לתבנית משומנת", "אפה בתנור כ-30 דקות עד שהפשטידה מוכנה"],
+      "prepTime": "35 דקות"
+    }
+  },
+  {
+    "title": "עוגת שוקולד",
+    "category": "desserts",
+    "image": "IMG/עוגת שוקולד.png",
+    "instructions": {
+      "ingredients": ["קמח", "סוכר", "שוקולד", "ביצים", "שמן", "חלב"],
+      "steps": ["ערבב את כל החומרים בקערה עד לקבלת בלילה חלקה", "שפוך לתבנית משומנת", "אפה בתנור כ-30 דקות"],
+      "prepTime": "40 דקות"
+    }
+  },
+  {
+    "title": "קרם ברולה",
+    "category": "desserts",
+    "image": "IMG/קרם ברולה.png",
+    "instructions": {
+      "ingredients": ["חלב", "שמנת", "סוכר", "חלמונים", "תמצית וניל"],
+      "steps": ["חמם חלב ושמנת", "הוסף חלמונים וסוכר תוך ערבוב", "שפוך לתבניות ואפה בסיר מים עד התייצבות", "קרר במקרר לפני ההגשה"],
+      "prepTime": "50 דקות"
+    }
+  },
+  {
+    "title": "שייק תות",
+    "category": "drinks",
+    "image": "IMG/שייק תות.png",
+    "instructions": {
+      "ingredients": ["תותים טריים", "חלב", "סוכר לפי הטעם", "קוביות קרח"],
+      "steps": ["שטוף את התותים וחתוך אותם", "ערבב בבלנדר עם חלב וסוכר", "הוסף קרח וטחון שוב", "הגש מיד"],
+      "prepTime": "5 דקות"
+    }
+  }
+];
+
+
+
+const grid = document.getElementById('recipes-grid');
+const modal = document.getElementById('recipe-modal');
+const modalImg = document.getElementById('modal-img');
+const modalTitle = document.getElementById('modal-title');
+const modalInstructions = document.getElementById('modal-instructions');
+
+function renderRecipes(list){
+  grid.innerHTML = '';
+  list.forEach((r)=>{
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `<img class="card-img" src="${r.image}" alt="">
+      <div class="card-body">
+        <h3 class="card-title">${r.title}</h3>
+        <p class="card-sub">${r.category}</p>
+      </div>`;
+    card.onclick = ()=> openModal(r);
+    grid.appendChild(card);
+  });
+}
+let recipes = getUserRecipes();
+renderRecipes(recipes);
+
+function openModal(recipe){
+  modal.classList.add('active');
+  modalImg.src = recipe.image;
+  modalTitle.textContent = recipe.title;
+
+  // הצגת מצרכים, שלבים וזמן הכנה
+  const instr = recipe.instructions;
+  modalInstructions.innerHTML = `
+    <strong>משך זמן הכנה:</strong> ${instr.prepTime}<br><br>
+    <strong>מצרכים:</strong><br> - ${instr.ingredients.join('<br> - ')}<br><br>
+    <strong>שלבי הכנה:</strong><br> - ${instr.steps.join('<br> - ')}
+  `;
+}
+
+// סגירת מודל
+document.getElementById('close-modal').onclick = ()=> {
+  modal.classList.remove('active');
+  speechSynthesis.cancel();
+};
+
+// חיפוש ומיון לפי קטגוריה
+document.getElementById('search').addEventListener('input', e=>{
+  const val = e.target.value.toLowerCase();
+  recipes = getUserRecipes();
+  renderRecipes(recipes.filter(r=> r.title.toLowerCase().includes(val) || r.category.toLowerCase().includes(val)));
+});
+document.querySelectorAll('.cat').forEach(btn=>{
+  btn.onclick = ()=> {
+    recipes = getUserRecipes();
+    renderRecipes(recipes.filter(r=> r.category === btn.dataset.cat));
+  };
+});
+
+// הקראה קולית
+let utterance;
+document.getElementById('start-read').onclick = ()=>{
+  if(utterance) speechSynthesis.cancel();
+  utterance = new SpeechSynthesisUtterance(modalInstructions.textContent);
+  utterance.lang = 'he-IL';
+  speechSynthesis.speak(utterance);
+};
+document.getElementById('pause-read').onclick = ()=> speechSynthesis.pause();
+document.getElementById('resume-read').onclick = ()=> speechSynthesis.resume();
+
+// ניווט כפתורים
+document.getElementById('btn-settings').onclick = ()=> window.location.href='settings.html';
+document.getElementById('btn-logout').onclick = ()=> {
+  localStorage.removeItem('lr_current_user');
+  window.location.href='login.html';
+};
+
+// הוספת מתכון חדש
+const addModal = document.getElementById('add-modal');
+document.getElementById('btn-add').onclick = ()=> addModal.classList.add('active');
+document.getElementById('close-add').onclick = ()=> addModal.classList.remove('active');
+document.getElementById('save-recipe').onclick = ()=>{
+  const title = document.getElementById('new-title').value;
+  const image = document.getElementById('new-image').value;
+  const category = document.getElementById('new-category').value;
+  const instructions = document.getElementById('new-instructions').value;
+  if(title && image && category && instructions){
+    const newRecipe = {title,image,category,instructions: {ingredients: [], steps: instructions.split('\n'), prepTime: '10 דקות'}};
+    saveUserRecipe(newRecipe);
+    recipes = getUserRecipes();
+    renderRecipes(recipes);
+    addModal.classList.remove('active');
+    document.getElementById('new-title').value='';
+    document.getElementById('new-image').value='';
+    document.getElementById('new-instructions').value='';
+  } else {
+    alert("נא למלא את כל השדות");
+  }
+};
+</script>
+</body>
+</html>

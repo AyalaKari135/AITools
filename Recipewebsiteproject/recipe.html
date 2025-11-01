@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מתכון — LuxRecipes</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+body {font-family:'Rubik', sans-serif; margin:0; background: linear-gradient(135deg,#fff8f0,#fff1e0); color:#222;}
+.topbar {display:flex; justify-content:space-between; align-items:center; padding:18px 28px; background: rgba(255,255,255,0.95); box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+.brand {font-weight:700; font-size:20px; color:#b88a00;}
+.link {background:transparent; border:none; cursor:pointer; color:#b88a00; font-weight:600; transition:0.3s;}
+.link:hover {transform:translateY(-2px); text-decoration:underline;}
+.container {max-width:1000px; margin:28px auto; padding:0 18px;}
+.recipe-full {background:white; padding:22px; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,0.06); animation:fadeIn 0.7s ease;}
+.recipe-full img {width:100%; border-radius:12px; margin-bottom:16px; object-fit:cover; max-height:350px;}
+.recipe-full h1 {margin-bottom:12px; color:#b88a00;}
+.recipe-text {white-space:pre-line; line-height:1.6;}
+.reader-controls {display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;}
+.reader-controls button {padding:10px 16px; border-radius:12px; border:none; cursor:pointer; background:linear-gradient(45deg,#e8b600,#c99b0e); color:white; transition:0.3s;}
+.reader-controls button:hover {transform:translateY(-2px); box-shadow:0 6px 18px rgba(201,155,14,0.4);}
+@keyframes fadeIn {from{opacity:0; transform: translateY(20px);} to{opacity:1; transform:translateY(0);}}
+@media(max-width:600px){.container{padding:12px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">LuxRecipes</div>
+  <nav>
+    <button id="back-home" class="link">חזור לבית</button>
+  </nav>
+</header>
+
+<main class="container">
+  <article class="recipe-full">
+    <img id="recipe-img" src="" alt="תמונה של המתכון">
+    <h1 id="recipe-title">טעינה...</h1>
+    <div id="recipe-text" class="recipe-text">אנא המתן בזמן שנטען המתכון.</div>
+
+    <div class="reader-controls">
+      <button id="start-speak">התחל בהקראה</button>
+      <button id="pause-speak">עצור הקראה</button>
+      <button id="resume-speak">המשך בהקראה</button>
+    </div>
+  </article>
+</main>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const recipeId = params.get('id');
+const recipes = JSON.parse(localStorage.getItem('lr_recipes')||'[]');
+const recipe = recipes.find(r=>r.id===recipeId) || recipes[0];
+
+document.getElementById('recipe-img').src = recipe.image;
+document.getElementById('recipe-title').textContent = recipe.title;
+document.getElementById('recipe-text').textContent = recipe.instructions;
+
+// ניווט חזרה
+document.getElementById('back-home').onclick = () => location.href='index.html';
+
+// הקראה קולית
+let utterance = new SpeechSynthesisUtterance(recipe.instructions);
+utterance.rate = parseFloat(localStorage.getItem('lr_settings_rate') || '1');
+let isPaused = false;
+
+document.getElementById('start-speak').onclick = ()=>{
+    speechSynthesis.cancel();
+    utterance = new SpeechSynthesisUtterance(recipe.instructions);
+    utterance.rate = parseFloat(localStorage.getItem('lr_settings_rate') || '1');
+    speechSynthesis.speak(utterance);
+    isPaused = false;
+};
+
+document.getElementById('pause-speak').onclick = ()=>{
+    if(!isPaused) { speechSynthesis.pause(); isPaused=true; }
+};
+
+document.getElementById('resume-speak').onclick = ()=>{
+    if(isPaused) { speechSynthesis.resume(); isPaused=false; }
+};
+</script>
+</body>
+</html>

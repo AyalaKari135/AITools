@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>הרשמה — LuxRecipes</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: 'Rubik', sans-serif;
+      background: linear-gradient(135deg, #ffecd2, #fcb69f);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .signup-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 40px;
+      width: 350px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+      position: relative;
+    }
+
+    h1 {
+      color: #ff7b54;
+      font-size: 2em;
+      margin-bottom: 15px;
+      animation: slideDown 0.7s ease-in-out;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 12px;
+      background: #f8f8f8;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      background: #fff7f2;
+      box-shadow: 0 0 10px #ffb88c;
+    }
+
+    button {
+      background: linear-gradient(45deg, #ff7b54, #ffb88c);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      width: 100%;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 123, 84, 0.4);
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 20px;
+      color: #ff7b54;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: #ff5722;
+    }
+
+    .msg {
+      margin-top: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: crimson;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* עיטור רקע עדין */
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .circle.one {
+      width: 100px;
+      height: 100px;
+      top: -40px;
+      left: -40px;
+    }
+
+    .circle.two {
+      width: 150px;
+      height: 150px;
+      bottom: -50px;
+      right: -50px;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="signup-container">
+    <div class="circle one"></div>
+    <div class="circle two"></div>
+
+    <h1>הרשמה</h1>
+    <p>צור חשבון חדש והצטרף אלינו</p>
+
+    <form id="signupForm">
+      <input type="text" id="username" placeholder="שם משתמש" required>
+      <input type="password" id="password" placeholder="סיסמה" required>
+      <button type="submit">הרשם</button>
+    </form>
+
+    <a href="login.html" class="back-link">יש לך כבר חשבון? התחבר</a>
+    <p class="msg" id="signup-msg"></p>
+  </div>
+
+  <script>
+    const LS_USERS = 'lr_users';
+    
+    function getUsers() { 
+      const data = localStorage.getItem(LS_USERS);
+      if (!data) return [];
+      const parsed = JSON.parse(data);
+      // המרה מהמבנה הישן (אובייקט) למבנה החדש (מערך)
+      if (!Array.isArray(parsed)) {
+        const converted = Object.entries(parsed).map(([username, password]) => ({username, password}));
+        localStorage.setItem(LS_USERS, JSON.stringify(converted));
+        return converted;
+      }
+      return parsed;
+    }
+    function saveUser(username, password) {
+      const users = getUsers();
+      users.push({username, password});
+      localStorage.setItem(LS_USERS, JSON.stringify(users));
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const msg = document.getElementById('signup-msg');
+
+      if(!username || !password){
+        msg.textContent = 'נא למלא את כל השדות';
+        return;
+      }
+
+      const users = getUsers();
+      if(users.some(user => user.password === password)){
+        msg.textContent = 'הסיסמה כבר קיימת, בחר אחרת';
+        return;
+      }
+
+      saveUser(username,password);
+      msg.style.color = 'green';
+      msg.textContent = 'נרשמת בהצלחה! מוביל לדף התחברות...';
+      setTimeout(()=> window.location.href='login.html',1000);
+    });
+  </script>
+</body>
+</html>

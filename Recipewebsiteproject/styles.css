@@ -1,0 +1,46 @@
+:root{
+--bg:#fff;
+--card:#fff;
+--text:#222;
+--accent:#b8860b; /* גוון זהב */
+--muted:#666;
+}
+body{font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); color:var(--text); margin:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 28px;border-bottom:1px solid #eee}
+.brand{font-weight:700;letter-spacing:1px;font-size:20px}
+.container{max-width:1000px;margin:28px auto;padding:0 18px}
+.hero{background:linear-gradient(90deg, rgba(255,249,240,0.9), rgba(255,255,255,0.6));padding:22px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,0.06)}
+.controls{display:flex;flex-direction:column;gap:12px;margin:18px 0}
+.controls input{padding:10px;border-radius:8px;border:1px solid #ddd}
+.categories{display:flex;gap:8px;flex-wrap:wrap}
+.cat{padding:8px 12px;border-radius:8px;border:1px solid #eee;background:transparent;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:18px}
+.card{background:var(--card);border-radius:12px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,0.06);display:flex;flex-direction:column}
+.card-img{height:160px;object-fit:cover;width:100%}
+.card-body{padding:12px}
+.card-title{margin:0 0 6px}
+.card-sub{color:var(--muted);font-size:14px}
+.btn{padding:8px 12px;border-radius:8px;border:1px solid transparent;cursor:pointer}
+.btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+.btn.ghost{background:transparent;border:1px solid #ccc}
+.link{background:transparent;border:none;cursor:pointer}
+.centered-page{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg)}
+.auth-card{width:340px;padding:16px;border-radius:12px;box-shadow:0 8px 36px rgba(0,0,0,0.08)}
+.auth-card input{display:block;width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd}
+.msg{color:crimson}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center}
+.modal.hidden{display:none}
+.modal-inner{background:var(--card);padding:16px;border-radius:10px;width:460px}
+.recipe-full img{width:100%;border-radius:12px}
+.reader-controls{display:flex;gap:8px;margin-top:12px}
+.settings label{display:block;margin:10px 0}
+.settings-actions{margin-top:12px}
+.note{color:var(--muted);font-size:13px}
+
+
+/* מצב כהה */
+body.dark{--bg:#0f0f10;--card:#121214;--text:#f3efe6;--muted:#a9a9a9}
+
+
+/* Responsive */
+@media (max-width:600px){.container{padding:12px}.modal-inner{width:92%}}
